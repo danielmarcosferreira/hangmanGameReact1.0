@@ -1,6 +1,7 @@
 import GlobalStyle from "./assets/styles/GlobalStyle";
 import styled from "styled-components";
 import palavras from "./palavras";
+import { useState } from "react";
 
 const alfabeto = [
   "a",
@@ -32,20 +33,48 @@ const alfabeto = [
 ];
 
 function App() {
+  const [desabilitaInput, setDesabilitaInput] = useState(true);
+  const [erros, setErros] = useState(0);
+  const [palavraEscolhida, setpalavraEscolhida] = useState([]);
+  const [palavraDoJogo, setPalavraDoJogo] = useState([]);
+
+  function iniciarJogo() {
+    setDesabilitaInput(false);
+    setErros(erros + 1);
+    sortearPalavra();
+  }
+
+  function sortearPalavra() {
+    const randomIndex = Math.floor(Math.random() * palavras.length);
+    const palavra = palavras[randomIndex];
+    const arrayPalavra = palavra.split("");
+    console.log(arrayPalavra);
+    setpalavraEscolhida(arrayPalavra);
+    
+    let tracinhos = []
+    arrayPalavra.forEach((l) => tracinhos.push(" _ "))
+    setPalavraDoJogo(tracinhos);
+  }
+
   return (
     <Container>
       <HangContainer>
-        <img src="../public/images/forca0.png" />
-        <button>Escolher Palavra</button>
+        <img src={`../public/images/forca0.png`} />
+        <div>
+          <button onClick={iniciarJogo}>Escolher Palavra</button>
+          <p>{palavraDoJogo}</p>
+        </div>
       </HangContainer>
       <Alphabet>
         {alfabeto.map((l) => (
-          <button>{l.toUpperCase()}</button>
+          <button disabled={desabilitaInput} key={l}>
+            {l.toUpperCase()}
+          </button>
         ))}
       </Alphabet>
       <Footer>
         <p>Já sei a palavra!</p>
-        <input></input>
+        <input disabled={desabilitaInput} />
         <button>Chutar</button>
       </Footer>
 
@@ -71,6 +100,13 @@ const HangContainer = styled.div`
     width: 30em;
   }
 
+  div {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
   button {
     background-color: #24ae60;
     color: white;
@@ -82,6 +118,12 @@ const HangContainer = styled.div`
     border-radius: 0.5em;
     cursor: pointer;
   }
+
+  p {
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
 `;
 
 const Alphabet = styled.div`
@@ -91,7 +133,8 @@ const Alphabet = styled.div`
   margin: 5px 20%;
 
   button {
-    background-color: #9faab5;
+    background-color: #b7dbf4;
+    /* #9faab5 */
     color: #727272;
     font-size: 20px;
     width: 40px;
@@ -100,6 +143,12 @@ const Alphabet = styled.div`
     border-radius: 3px;
     border: none;
     cursor: pointer;
+    &:hover {
+      background-color: blue;
+    }
+    &:disabled {
+      background-color: #9faab5;
+    }
   }
 `;
 
