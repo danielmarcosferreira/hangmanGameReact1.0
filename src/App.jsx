@@ -37,11 +37,13 @@ function App() {
   const [erros, setErros] = useState(0);
   const [palavraEscolhida, setpalavraEscolhida] = useState([]);
   const [palavraDoJogo, setPalavraDoJogo] = useState([]);
+  const [letrasUsadas, setLetrasUsadas] = useState(alfabeto);
+  const [stringSemAcento, setStringSemAcento] = useState("")
 
   function iniciarJogo() {
     setDesabilitaInput(false);
-    setErros(erros + 1);
     sortearPalavra();
+    setLetrasUsadas([])
   }
 
   function sortearPalavra() {
@@ -50,16 +52,37 @@ function App() {
     const arrayPalavra = palavra.split("");
     console.log(arrayPalavra);
     setpalavraEscolhida(arrayPalavra);
-    
-    let tracinhos = []
-    arrayPalavra.forEach((l) => tracinhos.push(" _ "))
+
+    let tracinhos = [];
+    arrayPalavra.forEach((l) => tracinhos.push(" _ "));
     setPalavraDoJogo(tracinhos);
+
+    const palavraSemAcento = palavra.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    setStringSemAcento(palavraSemAcento)
+    console.log(palavraSemAcento);
+  }
+
+  function clicouLetra(l) {
+    setLetrasUsadas([...letrasUsadas, l]);
+    if (stringSemAcento.includes(l)) {
+      acertouLetra (l)
+    } else {
+      errouLetra (l)
+    }
+  }
+
+  function acertouLetra (l) {
+    console.log("Contem Letra");
+  }
+
+  function errouLetra (l) {
+    setErros(erros + 1)
   }
 
   return (
     <Container>
       <HangContainer>
-        <img src={`../public/images/forca0.png`} />
+        <img src={`../public/images/forca${erros}.png`} />
         <div>
           <button onClick={iniciarJogo}>Escolher Palavra</button>
           <p>{palavraDoJogo}</p>
@@ -67,7 +90,11 @@ function App() {
       </HangContainer>
       <Alphabet>
         {alfabeto.map((l) => (
-          <button disabled={desabilitaInput} key={l}>
+          <button
+            disabled={letrasUsadas.includes(l) ?? true }
+            key={l}
+            onClick={() => clicouLetra(l)}
+          >
             {l.toUpperCase()}
           </button>
         ))}
@@ -148,6 +175,7 @@ const Alphabet = styled.div`
     }
     &:disabled {
       background-color: #9faab5;
+      cursor: none;
     }
   }
 `;
