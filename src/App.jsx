@@ -2,6 +2,13 @@ import GlobalStyle from "./assets/styles/GlobalStyle";
 import styled from "styled-components";
 import palavras from "./palavras";
 import { useState } from "react";
+import forca0 from "./assets/images/forca0.png";
+import forca1 from "./assets/images/forca1.png";
+import forca2 from "./assets/images/forca2.png";
+import forca3 from "./assets/images/forca3.png";
+import forca4 from "./assets/images/forca4.png";
+import forca5 from "./assets/images/forca5.png";
+import forca6 from "./assets/images/forca6.png";
 
 const alfabeto = [
   "a",
@@ -32,23 +39,31 @@ const alfabeto = [
   "z",
 ];
 
+const images = [forca0, forca1, forca2, forca3, forca4, forca5, forca6];
+
 function App() {
   const [desabilitaInput, setDesabilitaInput] = useState(true);
   const [erros, setErros] = useState(0);
   const [palavraEscolhida, setpalavraEscolhida] = useState([]);
   const [palavraDoJogo, setPalavraDoJogo] = useState([]);
   const [letrasUsadas, setLetrasUsadas] = useState(alfabeto);
-  const [stringSemAcento, setStringSemAcento] = useState("")
+  const [stringSemAcento, setStringSemAcento] = useState("");
+  const [chute, setChute] = useState("");
+  const [ganhou, setGanhou] = useState(false);
+  const [perdeu, setPerdeu] = useState(false);
 
   function iniciarJogo() {
+    setGanhou(false);
+    setPerdeu(false);
     setDesabilitaInput(false);
     sortearPalavra();
-    setLetrasUsadas([])
+    setLetrasUsadas([]);
+    console.log(ganhou);
   }
 
   function sortearPalavra() {
     const randomIndex = Math.floor(Math.random() * palavras.length);
-    const palavra = palavras[randomIndex];
+    const palavra = palavras[randomIndex].toUpperCase();
     const arrayPalavra = palavra.split("");
     console.log(arrayPalavra);
     setpalavraEscolhida(arrayPalavra);
@@ -57,41 +72,83 @@ function App() {
     arrayPalavra.forEach((l) => tracinhos.push(" _ "));
     setPalavraDoJogo(tracinhos);
 
-    const palavraSemAcento = palavra.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    setStringSemAcento(palavraSemAcento)
+    const palavraSemAcento = palavra
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+    setStringSemAcento(palavraSemAcento);
     console.log(palavraSemAcento);
   }
 
   function clicouLetra(l) {
     setLetrasUsadas([...letrasUsadas, l]);
     if (stringSemAcento.includes(l)) {
-      acertouLetra (l)
+      acertouLetra(l);
     } else {
-      errouLetra (l)
+      errouLetra(l);
     }
   }
 
-  function acertouLetra (l) {
-    console.log("Contem Letra");
+  function acertouLetra(letraClicada) {
+    let novaPalavraJogo = [...palavraDoJogo];
+    palavraEscolhida.forEach((l, index) => {
+      if (stringSemAcento[index] == letraClicada) {
+        novaPalavraJogo[index] = l.toUpperCase();
+      }
+    });
+    setPalavraDoJogo(novaPalavraJogo);
   }
 
-  function errouLetra (l) {
-    setErros(erros + 1)
+  function errouLetra(l) {
+    let contErros = erros + 1;
+    setErros(contErros);
+    console.log(contErros);
+    if (contErros == 6) {
+      perdeuJogo();
+    }
   }
+
+  function chutarPalavraInteira() {
+    let escolhidaString = "";
+    palavraEscolhida.forEach((l) => (escolhidaString += l));
+    if (chute == escolhidaString.toLocaleLowerCase()) {
+      ganhouJogo();
+    } else {
+      perdeuJogo();
+    }
+  }
+
+  function ganhouJogo() {
+    setGanhou(true);
+    setLetrasUsadas(alfabeto);
+    setDesabilitaInput(true);
+    setPalavraDoJogo(palavraEscolhida);
+    alert("Parabens voce ganhou o jogo!");
+  }
+
+  function perdeuJogo() {
+    setPerdeu(true);
+    setErros(6);
+    setLetrasUsadas(alfabeto);
+    setDesabilitaInput(true);
+    setPalavraDoJogo(palavraEscolhida);
+    alert("Voce perdeu o jogo, tente novamente");
+  }
+
+  const corPalavra = ganhou ? "green" : perdeu ? "red" : "black";
 
   return (
     <Container>
       <HangContainer>
-        <img src={`../public/images/forca${erros}.png`} />
+        <img src={images[erros]} />
         <div>
           <button onClick={iniciarJogo}>Escolher Palavra</button>
-          <p>{palavraDoJogo}</p>
+          <StyledParagraph cor={corPalavra}>{palavraDoJogo}</StyledParagraph>
         </div>
       </HangContainer>
       <Alphabet>
         {alfabeto.map((l) => (
           <button
-            disabled={letrasUsadas.includes(l) ?? true }
+            disabled={letrasUsadas.includes(l) ?? true}
             key={l}
             onClick={() => clicouLetra(l)}
           >
@@ -101,8 +158,14 @@ function App() {
       </Alphabet>
       <Footer>
         <p>Já sei a palavra!</p>
-        <input disabled={desabilitaInput} />
-        <button>Chutar</button>
+        <input
+          disabled={desabilitaInput}
+          value={chute}
+          onChange={(e) => setChute(e.target.value)}
+        />
+        <button onClick={chutarPalavraInteira} disabled={desabilitaInput}>
+          Chutar
+        </button>
       </Footer>
 
       <GlobalStyle />
@@ -135,6 +198,7 @@ const HangContainer = styled.div`
   }
 
   button {
+    color: ${(props) => props.color};
     background-color: #24ae60;
     color: white;
     font-size: 13px;
@@ -146,11 +210,20 @@ const HangContainer = styled.div`
     cursor: pointer;
   }
 
-  p {
+  /* p {
+    color: ${(props) => props.color};
+    background-color: ${(props) => props.color};
     font-size: 30px;
     font-weight: bold;
     margin-bottom: 20px;
-  }
+  } */
+`;
+
+const StyledParagraph = styled.p`
+  color: ${(props) => props.cor};
+  font-size: 30px;
+  font-weight: bold;
+  margin-bottom: 20px;
 `;
 
 const Alphabet = styled.div`
@@ -175,7 +248,7 @@ const Alphabet = styled.div`
     }
     &:disabled {
       background-color: #9faab5;
-      cursor: none;
+      cursor: auto;
     }
   }
 `;
@@ -207,6 +280,11 @@ const Footer = styled.div`
     border-radius: 5px;
     border: 1px solid #10466d;
     cursor: pointer;
+
+    &:disabled {
+      background-color: #9faab5;
+      cursor: auto;
+    }
   }
 `;
 
