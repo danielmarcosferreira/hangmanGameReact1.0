@@ -55,18 +55,19 @@ function App() {
   function iniciarJogo() {
     setGanhou(false);
     setPerdeu(false);
+    setErros(0);
     setDesabilitaInput(false);
     sortearPalavra();
     setLetrasUsadas([]);
-    console.log(ganhou);
+    setChute("");
   }
 
   function sortearPalavra() {
     const randomIndex = Math.floor(Math.random() * palavras.length);
-    const palavra = palavras[randomIndex].toUpperCase();
+    const palavra = palavras[randomIndex];
     const arrayPalavra = palavra.split("");
-    console.log(arrayPalavra);
     setpalavraEscolhida(arrayPalavra);
+    console.log(palavra);
 
     let tracinhos = [];
     arrayPalavra.forEach((l) => tracinhos.push(" _ "));
@@ -76,11 +77,11 @@ function App() {
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "");
     setStringSemAcento(palavraSemAcento);
-    console.log(palavraSemAcento);
   }
 
   function clicouLetra(l) {
-    setLetrasUsadas([...letrasUsadas, l]);
+    const letrasClicadas = [...letrasUsadas, l];
+    setLetrasUsadas(letrasClicadas);
     if (stringSemAcento.includes(l)) {
       acertouLetra(l);
     } else {
@@ -96,21 +97,22 @@ function App() {
       }
     });
     setPalavraDoJogo(novaPalavraJogo);
+    if (novaPalavraJogo.join("").toLowerCase() == palavraEscolhida.join("")) {
+      ganhouJogo();
+    }
   }
 
   function errouLetra(l) {
     let contErros = erros + 1;
     setErros(contErros);
-    console.log(contErros);
     if (contErros == 6) {
       perdeuJogo();
     }
   }
 
   function chutarPalavraInteira() {
-    let escolhidaString = "";
-    palavraEscolhida.forEach((l) => (escolhidaString += l));
-    if (chute == escolhidaString.toLocaleLowerCase()) {
+    let escolhidaString = palavraEscolhida.join("");
+    if (chute.toLowerCase() == escolhidaString) {
       ganhouJogo();
     } else {
       perdeuJogo();
@@ -118,20 +120,28 @@ function App() {
   }
 
   function ganhouJogo() {
+    alert("Parabéns você ganhou o jogo! :)");
     setGanhou(true);
-    setLetrasUsadas(alfabeto);
-    setDesabilitaInput(true);
-    setPalavraDoJogo(palavraEscolhida);
-    alert("Parabens voce ganhou o jogo!");
+    terminaJogo();
   }
 
   function perdeuJogo() {
-    setPerdeu(true);
     setErros(6);
+    alert("Você perdeu o jogo! :c");
+    setPerdeu(true);
+    terminaJogo();
+  }
+
+  function terminaJogo() {
+    const palavraFinal = palavraEscolhida.join("").toUpperCase();
+    setPalavraDoJogo(palavraFinal);
     setLetrasUsadas(alfabeto);
     setDesabilitaInput(true);
-    setPalavraDoJogo(palavraEscolhida);
-    alert("Voce perdeu o jogo, tente novamente");
+    if (confirm("Gostaria de Jogar de novo")) {
+      iniciarJogo();
+    } else {
+      alert("Obrigado por ter jogado!");
+    }
   }
 
   const corPalavra = ganhou ? "green" : perdeu ? "red" : "black";
@@ -141,7 +151,9 @@ function App() {
       <HangContainer>
         <img src={images[erros]} />
         <div>
-          <button onClick={iniciarJogo}>Escolher Palavra</button>
+          <button onClick={iniciarJogo} disabled={!desabilitaInput}>
+            Escolher Palavra
+          </button>
           <StyledParagraph cor={corPalavra}>{palavraDoJogo}</StyledParagraph>
         </div>
       </HangContainer>
@@ -174,77 +186,84 @@ function App() {
 }
 
 const Container = styled.div`
-  width: 100%;
   height: 100vh;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 `;
 
 const HangContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin: 4em;
+  margin: 1em;
 
   img {
-    width: 30em;
+    width: 13rem;
+    text-align: center;
+    margin-right: ;
   }
 
   div {
-    height: 100%;
+    height: 17rem;
+    width: 30%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    align-items: center;
   }
 
   button {
-    color: ${(props) => props.color};
     background-color: #24ae60;
     color: white;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: bolder;
-    margin-top: 3em;
-    width: 14em;
-    height: 4em;
+    margin: 0.5em;
+    width: 9em;
+    height: 3em;
     border-radius: 0.5em;
     cursor: pointer;
-  }
 
-  /* p {
-    color: ${(props) => props.color};
-    background-color: ${(props) => props.color};
-    font-size: 30px;
-    font-weight: bold;
-    margin-bottom: 20px;
-  } */
+    &:hover {
+      background-color: #63cc8b;
+    }
+    &:disabled {
+      background-color: #63cc8b;
+      cursor: auto;
+    }
+  }
 `;
 
 const StyledParagraph = styled.p`
   color: ${(props) => props.cor};
-  font-size: 30px;
+  font-size: 17px;
   font-weight: bold;
   margin-bottom: 20px;
+  text-align: center;
 `;
 
 const Alphabet = styled.div`
+  /* width: 25rem; */
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  margin: 5px 20%;
+  margin: 1rem 1rem;
+  padding: 0 1rem;
+  border-radius: 10px;
 
   button {
     background-color: #b7dbf4;
     /* #9faab5 */
     color: #727272;
     font-size: 20px;
-    width: 40px;
-    height: 40px;
+    width: 1.3em;
+    height: 1.3em;
     margin: 3px;
     border-radius: 3px;
     border: none;
     cursor: pointer;
     &:hover {
-      background-color: blue;
+      background-color: #6e9eaf;
     }
     &:disabled {
       background-color: #9faab5;
@@ -260,14 +279,17 @@ const Footer = styled.div`
   margin: 20px 0;
 
   p {
-    font-size: 24px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: lighter;
+    font-weight: bolder;
   }
 
   input {
-    width: 220px;
+    width: 170px;
     height: 30px;
     border-radius: 5px;
-    margin: 0 15px;
+    margin: 0 10px;
   }
 
   button {
@@ -275,11 +297,15 @@ const Footer = styled.div`
     color: #10466d;
     font-size: 16px;
     font-weight: bold;
-    width: 80px;
-    height: 35px;
+    width: 70px;
+    height: 32px;
     border-radius: 5px;
     border: 1px solid #10466d;
     cursor: pointer;
+
+    &:hover {
+      background-color: #6e9eaf;
+    }
 
     &:disabled {
       background-color: #9faab5;

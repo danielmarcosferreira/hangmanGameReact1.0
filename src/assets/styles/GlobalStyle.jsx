@@ -46,8 +46,7 @@ table {
 }
 
 *{
-    box-sizing: border-box;
-}
+    box-sizing: border-box;}
 `;
 
 export default GlobalStyle;
