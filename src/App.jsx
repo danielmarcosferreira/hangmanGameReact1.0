@@ -256,6 +256,7 @@ const Alphabet = styled.div`
     /* #9faab5 */
     color: #727272;
     font-size: 20px;
+    text-align: center;
     width: 1.3em;
     height: 1.3em;
     margin: 3px;
@@ -299,6 +300,7 @@ const Footer = styled.div`
     font-weight: bold;
     width: 70px;
     height: 32px;
+    text-align: center;
     border-radius: 5px;
     border: 1px solid #10466d;
     cursor: pointer;
